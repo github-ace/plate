@@ -1,13 +1,13 @@
 /* eslint-disable react/no-multi-comp */
 import Taro, { Component } from "@tarojs/taro";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 import { View, Text, Image } from "@tarojs/components";
 import styles from "./plateInput.module.less";
 
 export default class Index extends Component {
-    static defaultProps = {
-        onCurrentCode: PropTypes.func
-      }
+  static defaultProps = {
+    onCurrentCode: PropTypes.func
+  };
   state = {
     current: 0,
     code: ["浙", "", "", "", "", "", "", ""],
@@ -24,11 +24,11 @@ export default class Index extends Component {
       ["青", "藏", "琼", "宁", "渝", "使"]
     ],
     keyBoardShow: false,
-    needAdapter:false
+    needAdapter: false
   };
   keyBoardShow() {
-    this.setState({keyBoardShow:true})
-    Taro.pageScrollTo({ scrollTop: 1800 })
+    this.setState({ keyBoardShow: true });
+    if(Taro.getEnv() == 'WEB'){document.querySelector('.taro-tabbar__panel').scrollTop="1800"}else{Taro.pageScrollTo({ scrollTop: 1800 })};
   }
   changeCurrent(e) {
     this.setState({ current: e });
@@ -36,38 +36,55 @@ export default class Index extends Component {
   editCurrentInput(e) {
     var code = this.state.code;
     var val = e.currentTarget.dataset.val;
-    if (this.state.current == 1 && /^\d$/.test(val)||this.state.current != 0 && "港澳学领IO".indexOf(val) > -1) {
+    if (
+      (this.state.current == 1 && /^\d$/.test(val)) ||
+      (this.state.current != 0 && "港澳学领IO".indexOf(val) > -1)
+    ) {
       return;
     }
     if (val == "删除") {
       code[this.state.current] = "";
-      this.setState(() => ({
+      var current =
+        this.state.current == 7
+          ? 7
+          : this.state.current - 1 < 0
+          ? 0
+          : this.state.current - 1;
+      this.setState({
         code: code,
-        current: this.state.current==7?7:this.state.current - 1 < 0 ? 0 : this.state.current - 1
-      }));
+        current: current
+      });
       return;
     }
     if (val == "确定") {
-        this.setState({keyBoardShow:false})
-        return;
-      }
+      this.setState({ keyBoardShow: false });
+      return;
+    }
     code[this.state.current] = val;
     // console.log(code)
-    this.setState(() => ({
+    var current =
+      this.state.current == 7
+        ? 7
+        : this.state.current + 1 > 6
+        ? 6
+        : this.state.current + 1;
+    this.setState({
       code: code,
-      current: this.state.current==7?7:this.state.current + 1 > 6 ? 6 : this.state.current + 1
-    }));
-    this.props.onCurrentCode(this.state.code)
+      current: current
+    });
+    this.props.onCurrentCode(this.state.code);
   }
-  componentDidMount(){
+  componentDidMount() {
     Taro.getSystemInfo({
-        success:res=>this.setState({needAdapter:res.model.indexOf("iPhone X")>-1})
-    })
+      success: res =>
+        this.setState({ needAdapter: res.model.indexOf("iPhone X") > -1 })
+    });
   }
   render() {
+    console.log(this.state.current);
     return (
       <View>
-        <View className={styles.inputG} onClick={()=>this.keyBoardShow()}> 
+        <View className={styles.inputG} onClick={() => this.keyBoardShow()}>
           {this.state.code.slice(0, 2).map((item, index) => (
             <Text
               onClick={() => this.changeCurrent(index)}
@@ -103,14 +120,32 @@ export default class Index extends Component {
               {item}
             </Text>
           ))}
-          <View onClick={() => this.changeCurrent(7)} className={styles.item +
-                " " +
-                (this.state.current ==7 ? styles.active : "")}
+          <View
+            onClick={() => this.changeCurrent(7)}
+            className={
+              styles.item + " " + (this.state.current == 7 ? styles.active : "")
+            }
           >
-              {this.state.code[7]==""?<Image className={styles.new_power} src={Taro.getApp().getGlobalData.imgUrlBase+'/tingche/pay/new_power.png'} />:this.state.code[7]}
+            {this.state.code[7] == "" ? (
+              <Image
+                className={styles.new_power}
+                src={
+                  Taro.getApp().getGlobalData.imgUrlBase +
+                  "/tingche/pay/new_power.png"
+                }
+              />
+            ) : (
+              this.state.code[7]
+            )}
           </View>
         </View>
-        <View className={styles.keyboard} style={{display:this.state.keyBoardShow?'':'none',paddingBottom:this.state.needAdapter?Taro.pxTransform(88):''}}>
+        <View
+          className={styles.keyboard}
+          style={{
+            display: this.state.keyBoardShow ? "" : "none",
+            paddingBottom: this.state.needAdapter ? Taro.pxTransform(88) : ""
+          }}
+        >
           {this.state.current == 0
             ? this.state.keyBoardListArea.map((item, index) => (
                 <View
@@ -142,15 +177,15 @@ export default class Index extends Component {
                   {item.map((e, indexs) => (
                     <Text
                       data-val={e}
-                      onClick={i => this.editCurrentInput(i)
-                      }
+                      onClick={i => this.editCurrentInput(i)}
                       className={
                         styles.item +
                         " " +
                         (e == "确定" || e == "删除" ? styles.btn : "") +
                         " " +
                         ((this.state.current == 1 && index == 0) ||
-                        (this.state.current != 0 && "港澳学领IO".indexOf(e) > -1)
+                        (this.state.current != 0 &&
+                          "港澳学领IO".indexOf(e) > -1)
                           ? styles.active
                           : "")
                       }
