@@ -54,6 +54,7 @@ export default class Index extends Component {
         code: code,
         current: current
       });
+      this.props.onCurrentCode(this.state.code);
       return;
     }
     if (val == "确定") {
