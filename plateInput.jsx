@@ -5,12 +5,9 @@ import { View, Text, Image } from "@tarojs/components";
 import styles from "./plateInput.module.less";
 
 export default class Index extends Component {
-  static defaultProps = {
-    onCurrentCode: PropTypes.func
-  };
   state = {
     current: 0,
-    code: ["浙", "", "", "", "", "", "", ""],
+    // code: ["浙", "", "", "", "", "", "", ""],
     keyBoardList: [
       ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"],
       ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
@@ -28,13 +25,18 @@ export default class Index extends Component {
   };
   keyBoardShow() {
     this.setState({ keyBoardShow: true });
-    if(Taro.getEnv() == 'WEB'){document.querySelector('.taro-tabbar__panel').scrollTop="1800"}else{Taro.pageScrollTo({ scrollTop: 1800 })};
+    if (Taro.getEnv() == "WEB") {
+      document.querySelector(".taro-tabbar__panel").scrollTop = "1800";
+    } else {
+      Taro.pageScrollTo({ scrollTop: 1800 });
+    }
   }
   changeCurrent(e) {
     this.setState({ current: e });
   }
   editCurrentInput(e) {
-    var code = this.state.code;
+    // var code = this.state.code;
+    var code = this.props.code
     var val = e.currentTarget.dataset.val;
     if (
       (this.state.current == 1 && /^\d$/.test(val)) ||
@@ -51,10 +53,11 @@ export default class Index extends Component {
           ? 0
           : this.state.current - 1;
       this.setState({
-        code: code,
+        // code: code,
         current: current
       });
-      this.props.onCurrentCode(this.state.code);
+      // this.props.onCurrentCode(this.state.code);
+      this.props.onCurrentCode(code);
       return;
     }
     if (val == "确定") {
@@ -70,10 +73,11 @@ export default class Index extends Component {
         ? 6
         : this.state.current + 1;
     this.setState({
-      code: code,
+      // code: code,
       current: current
     });
-    this.props.onCurrentCode(this.state.code);
+    // this.props.onCurrentCode(this.state.code);
+    this.props.onCurrentCode(code);
   }
   componentDidMount() {
     Taro.getSystemInfo({
@@ -86,7 +90,7 @@ export default class Index extends Component {
     return (
       <View>
         <View className={styles.inputG} onClick={() => this.keyBoardShow()}>
-          {this.state.code.slice(0, 2).map((item, index) => (
+          {this.props.code.slice(0, 2).map((item, index) => (
             <Text
               onClick={() => this.changeCurrent(index)}
               className={
@@ -94,7 +98,7 @@ export default class Index extends Component {
                 " " +
                 (this.state.current == index ? styles.active : "")
               }
-              key={index}
+              key={'A'+index}
             >
               {item}
             </Text>
@@ -108,7 +112,7 @@ export default class Index extends Component {
           >
             ·
           </Text>
-          {this.state.code.slice(2, 7).map((item, index) => (
+          {this.props.code.slice(2, 7).map((item, index) => (
             <Text
               onClick={() => this.changeCurrent(index + 2)}
               className={
@@ -116,7 +120,7 @@ export default class Index extends Component {
                 " " +
                 (this.state.current == index + 2 ? styles.active : "")
               }
-              key={index}
+              key={'B'+index}
             >
               {item}
             </Text>
@@ -127,7 +131,7 @@ export default class Index extends Component {
               styles.item + " " + (this.state.current == 7 ? styles.active : "")
             }
           >
-            {this.state.code[7] == "" ? (
+            {this.props.code[7] == "" ? (
               <Image
                 className={styles.new_power}
                 src={
@@ -136,7 +140,7 @@ export default class Index extends Component {
                 }
               />
             ) : (
-              this.state.code[7]
+              this.props.code[7]
             )}
           </View>
         </View>
@@ -159,14 +163,14 @@ export default class Index extends Component {
                         ? Taro.pxTransform(464)
                         : ""
                   }}
-                  key={index}
+                  key={'C'+index}
                 >
                   {item.map((e, indexs) => (
                     <Text
                       data-val={e}
                       onClick={i => this.editCurrentInput(i)}
                       className={styles.item}
-                      key={indexs}
+                      key={"E"+indexs}
                     >
                       {e}
                     </Text>
@@ -174,7 +178,7 @@ export default class Index extends Component {
                 </View>
               ))
             : this.state.keyBoardList.map((item, index) => (
-                <View className={styles.line} key={index}>
+                <View className={styles.line} key={'D'+index}>
                   {item.map((e, indexs) => (
                     <Text
                       data-val={e}
@@ -190,7 +194,7 @@ export default class Index extends Component {
                           ? styles.active
                           : "")
                       }
-                      key={indexs}
+                      key={"F"+indexs}
                     >
                       {e}
                     </Text>
@@ -202,3 +206,20 @@ export default class Index extends Component {
     );
   }
 }
+
+
+Index.defaultProps = {
+  code:["", "", "", "", "", "", "", ""]
+};
+
+Index.propTypes = {
+  onCurrentCode: PropTypes.func,
+  code:function(props, propName, componentName){
+    if (!(Array.isArray(props[propName]) && props[propName].length == 8)) {
+      return new Error(
+        '你写的这个 `' + propName + '` 属性在' +
+        ' `' + componentName + '`组件里面肯定有问题'
+      );
+    }
+  }
+};
